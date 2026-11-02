@@ -57,3 +57,50 @@ variable "internet_route_cidr" {
   type        = string
   default     = "0.0.0.0/0"
 }
+
+
+# ============================================
+# SECURITY & NAT VARIABLES
+# ============================================
+
+variable "enable_nat_gateway" {
+  description = "Enable NAT Gateway for private subnet internet access"
+  type        = bool
+  default     = true
+}
+
+variable "nat_gateway_count" {
+  description = "Number of NAT Gateways (1 for cost savings, 3 for high availability)"
+  type        = number
+  default     = 1 # Single NAT saves approximately $22/month vs 3 NATs
+}
+
+variable "backend_port" {
+  description = "Backend application port"
+  type        = number
+  default     = 3001
+}
+
+variable "postgres_port" {
+  description = "PostgreSQL database port"
+  type        = number
+  default     = 5432
+}
+
+variable "redis_port" {
+  description = "Redis cache port"
+  type        = number
+  default     = 6379
+}
+
+variable "http_port" {
+  description = "HTTP port"
+  type        = number
+  default     = 80
+}
+
+variable "https_port" {
+  description = "HTTPS port"
+  type        = number
+  default     = 443
+}

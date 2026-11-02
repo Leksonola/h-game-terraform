@@ -224,3 +224,50 @@ output "private_subnet_3_id" {
   description = "ID of private subnet 3"
   value       = aws_subnet.private_3.id
 }
+
+
+# ============================================
+# PRIVATE ROUTE TABLE
+# ============================================
+# Routes traffic from private subnets through NAT Gateway
+# This is how private subnets get outbound internet access
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  # Route: Send all internet traffic to NAT Gateway
+  route {
+    cidr_block     = var.internet_route_cidr
+    nat_gateway_id = aws_nat_gateway.main.id
+  }
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.name_prefix}-private-rt"
+      Type = "private"
+      Task = "T2"
+    }
+  )
+}
+
+
+# ============================================
+# PRIVATE SUBNET ROUTE TABLE ASSOCIATIONS
+# ============================================
+# Associate private subnets with private route table
+
+resource "aws_route_table_association" "private_1" {
+  subnet_id      = aws_subnet.private_1.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_2" {
+  subnet_id      = aws_subnet.private_2.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_3" {
+  subnet_id      = aws_subnet.private_3.id
+  route_table_id = aws_route_table.private.id
+}
