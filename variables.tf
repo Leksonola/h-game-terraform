@@ -104,3 +104,31 @@ variable "https_port" {
   type        = number
   default     = 443
 }
+
+# ============================================
+# EKS CLUSTER VARIABLES
+# ============================================
+
+variable "eks_cluster_name" {
+  description = "EKS cluster name"
+  type        = string
+  default     = "h-game-prod"
+}
+
+variable "kubernetes_version" {
+  description = "Kubernetes version for EKS cluster"
+  type        = string
+  default     = "1.28"
+}
+
+variable "enable_cluster_logging" {
+  description = "Enable EKS cluster logging to CloudWatch"
+  type        = bool
+  default     = true
+}
+
+variable "cluster_log_types" {
+  description = "EKS cluster log types to enable"
+  type        = list(string)
+  default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+}
