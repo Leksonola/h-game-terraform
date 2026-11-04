@@ -22,8 +22,8 @@ resource "aws_eks_cluster" "main" {
     ]
 
     # Endpoint access configuration
-    endpoint_private_access = true  # Allow access from VPC
-    endpoint_public_access  = true  # Allow access from internet (for kubectl)
+    endpoint_private_access = true # Allow access from VPC
+    endpoint_public_access  = true # Allow access from internet (for kubectl)
 
     # Security groups for cluster
     # EKS will create additional security groups automatically.
