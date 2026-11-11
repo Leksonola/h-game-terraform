@@ -214,3 +214,112 @@ variable "node_capacity_type" {
     error_message = "Capacity type must be either ON_DEMAND or SPOT."
   }
 }
+
+
+# ============================================
+# RDS VARIABLES
+# ============================================
+
+variable "rds_db_name" {
+  description = "RDS database name"
+  type        = string
+  default     = "humor_memory_game"
+  sensitive   = false
+}
+
+variable "rds_username" {
+  description = "RDS master username"
+  type        = string
+  default     = "gameuser"
+  sensitive   = false
+}
+
+variable "rds_password" {
+  description = "RDS master password"
+  type        = string
+  sensitive   = true # Marks as sensitive (won't show in logs)
+
+  # Set this in terraform.tfvars, NOT here!
+  validation {
+    condition = (
+      length(var.rds_password) >= 16 &&
+      can(regex("[A-Z]", var.rds_password)) &&
+      can(regex("[a-z]", var.rds_password)) &&
+      can(regex("[0-9]", var.rds_password))
+    )
+
+    error_message = <<-EOT
+      Password must be at least 16 characters and contain:
+      - At least one uppercase letter (A-Z)
+      - At least one lowercase letter (a-z)
+      - At least one number (0-9)
+
+      Example: MySecurePassword123456
+    EOT
+  }
+}
+
+variable "rds_instance_class" {
+  description = "RDS instance type"
+  type        = string
+  default     = "db.t3.micro"
+
+  validation {
+    condition = can(regex(
+      "^db\\.t[34]\\.(micro|small|medium|large)$",
+      var.rds_instance_class
+    ))
+
+    error_message = "Instance class must be db.t3 or db.t4 family (micro, small, medium, large)."
+  }
+}
+
+variable "rds_db_identifier" {
+  description = "RDS instance identifier (unique name)"
+  type        = string
+  default     = "h-game-postgres"
+}
+
+variable "rds_port" {
+  description = "RDS PostgreSQL port"
+  type        = number
+  default     = 5432
+}
+
+
+# ============================================
+# ELASTICACHE VARIABLES
+# ============================================
+
+variable "elasticache_node_type" {
+  description = "ElastiCache node type"
+  type        = string
+  default     = "cache.t3.micro"
+
+  validation {
+    condition = can(regex(
+      "^cache\\.t3\\.(micro|small|medium)$",
+      var.elasticache_node_type
+    ))
+
+    error_message = "ElastiCache node type must be cache.t3.micro, cache.t3.small, or cache.t3.medium."
+  }
+}
+
+variable "elasticache_num_cache_nodes" {
+  description = "Number of cache nodes"
+  type        = number
+  default     = 1
+}
+
+variable "redis_port" {
+  description = "Redis cache port"
+  type        = number
+  default     = 6379
+}
+
+variable "redis_cluster_id" {
+  description = "ElastiCache cluster identifier"
+  type        = string
+  default     = "h-game-redis"
+}

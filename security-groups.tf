@@ -102,11 +102,11 @@ resource "aws_security_group" "database" {
 
   # Ingress Rule: Allow PostgreSQL from backend only
   ingress {
-    description     = "PostgreSQL from backend"
-    from_port       = var.postgres_port
-    to_port         = var.postgres_port
-    protocol        = "tcp"
-    security_groups = [aws_security_group.backend.id]
+  description     = "PostgreSQL from EKS cluster nodes"
+  from_port       = var.rds_port
+  to_port         = var.rds_port
+  protocol        = "tcp"
+  security_groups = [aws_eks_cluster.main.vpc_config[0].cluster_security_group_id]
   }
 
   # Egress: Allow all (database needs to respond)
