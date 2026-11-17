@@ -113,3 +113,33 @@ output "eks_nodes_role_arn" {
   description = "ARN of EKS nodes IAM role"
   value       = aws_iam_role.eks_nodes.arn
 }
+
+
+
+# ============================================
+# EKS OIDC PROVIDER
+# ============================================
+
+# Required for IAM Roles for Service Accounts (IRSA)
+
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  client_id_list = ["sts.amazonaws.com"]
+
+  thumbprint_list = [
+    data.tls_certificate.eks.certificates[0].sha1_fingerprint
+  ]
+
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.name_prefix}-eks-oidc-provider"
+      Task = "T7"
+    }
+  )
+}

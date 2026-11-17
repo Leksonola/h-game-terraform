@@ -263,3 +263,85 @@ output "cache_security_group_id" {
   description = "ID of cache security group"
   value       = aws_security_group.cache.id
 }
+
+
+resource "aws_security_group" "alb" {
+  name        = "${local.name_prefix}-alb-sg"
+  description = "Security group for Application Load Balancer"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "HTTP from internet"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTPS from internet"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+# ============================================
+# EKS-Managed Security Group Rules
+# ============================================
+
+# EKS automatically creates a security group for the cluster.
+# These rules allow ALB to reach pods on the EKS-managed security group.
+
+data "aws_security_group" "eks_cluster_managed" {
+  filter {
+    name   = "tag:aws:eks:cluster-name"
+    values = [aws_eks_cluster.main.name]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["eks-cluster-sg-${aws_eks_cluster.main.name}-*"]
+  }
+}
+
+# Allow ALB to reach backend pods (port 3001)
+resource "aws_security_group_rule" "alb_to_eks_managed_nodes_backend" {
+  description = "Allow ALB to reach backend pods on EKS-managed node security group"
+  type        = "ingress"
+  from_port   = var.backend_port # 3001
+  to_port     = var.backend_port
+  protocol    = "tcp"
+
+  source_security_group_id = aws_security_group.alb.id
+  security_group_id        = data.aws_security_group.eks_cluster_managed.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Allow ALB to reach frontend pods (port 80)
+resource "aws_security_group_rule" "alb_to_eks_managed_nodes_frontend" {
+  description = "Allow ALB to reach frontend pods on EKS-managed node security group"
+  type        = "ingress"
+  from_port   = 80
+  to_port     = 80
+  protocol    = "tcp"
+
+  source_security_group_id = aws_security_group.alb.id
+  security_group_id        = data.aws_security_group.eks_cluster_managed.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}

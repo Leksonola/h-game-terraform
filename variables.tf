@@ -323,3 +323,60 @@ variable "redis_cluster_id" {
   type        = string
   default     = "h-game-redis"
 }
+
+
+# ============================================
+# ROUTE53 & ACM VARIABLES (OPTIONAL)
+# ============================================
+
+variable "domain_name" {
+  description = "Domain name for the application (e.g., yourdomain.com). Leave empty to skip Route53 setup."
+  type        = string
+  default     = "" # Empty = skip Route53 setup
+}
+
+variable "app_subdomain" {
+  description = "Subdomain for the application (e.g., game for game.yourdomain.com)"
+  type        = string
+  default     = "game"
+}
+
+variable "certificate_domain" {
+  description = "Domain for ACM certificate (can be wildcard, e.g., *.yourdomain.com). Leave empty to skip ACM setup."
+  type        = string
+  default     = "" # Empty = skip ACM setup
+}
+
+
+# ============================================
+# ECR VARIABLES
+# ============================================
+
+variable "ecr_backend_repository" {
+  description = "ECR repository name for backend images"
+  type        = string
+  default     = "h-game-backend"
+}
+
+variable "ecr_frontend_repository" {
+  description = "ECR repository name for frontend images"
+  type        = string
+  default     = "h-game-frontend"
+}
+
+variable "ecr_image_tag_mutability" {
+  description = "Image tag mutability: MUTABLE or IMMUTABLE"
+  type        = string
+  default     = "MUTABLE"
+
+  validation {
+    condition     = contains(["MUTABLE", "IMMUTABLE"], var.ecr_image_tag_mutability)
+    error_message = "Image tag mutability must be either MUTABLE or IMMUTABLE."
+  }
+}
+
+variable "ecr_scan_on_push" {
+  description = "Enable image scanning on push (for security)"
+  type        = bool
+  default     = true
+}

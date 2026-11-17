@@ -21,3 +21,33 @@ provider "aws" {
     }
   }
 }
+
+
+required_providers {
+  aws = {
+    source  = "hashicorp/aws"
+    version = "~> 6.0"
+  }
+
+  tls = {
+    source  = "hashicorp/tls"
+    version = "~> 4.0"
+  }
+}
+
+
+# Provider alias for us-east-1 (required for ACM certificates used by ALB)
+# ACM certificates for ALB must be in us-east-1 (AWS requirement)
+
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Project     = var.project_name
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+    }
+  }
+}
